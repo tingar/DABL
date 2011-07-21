@@ -20,6 +20,12 @@ require_once dirname(__FILE__) . '/../BaseSchemaParser.php';
 class PgsqlSchemaParser extends BaseSchemaParser
 {
 
+	private $_schema;
+
+	function __construct($schema = 'public') {
+		$this->_schema = $schema;
+	}
+
 	/**
 	 * Map PostgreSQL native types to Propel types.
 	 * @var        array
@@ -112,7 +118,7 @@ class PgsqlSchemaParser extends BaseSchemaParser
 			if ($task) $task->log("  Adding table '" . $name . "' in schema '" . $namespacename . "'", Project::MSG_VERBOSE);
 			$oid = $row['oid'];
 			$table = new Table($name);
-			if ($namespacename != 'public') {
+			if ($namespacename != $this->_schema) {
 				$table->setSchema($namespacename);
 			}
 			$database->addTable($table);
@@ -350,9 +356,9 @@ class PgsqlSchemaParser extends BaseSchemaParser
 								          conname,
 								          confupdtype,
 								          confdeltype,
-								          CASE nl.nspname WHEN 'public' THEN cl.relname ELSE nl.nspname||'.'||cl.relname END as fktab,
+								          CASE nl.nspname WHEN '{$this->_schema}' THEN cl.relname ELSE nl.nspname||'.'||cl.relname END as fktab,
 										  array_agg(DISTINCT a2.attname) AS fkcols,
-								          CASE nr.nspname WHEN 'public' THEN cr.relname ELSE nr.nspname||'.'||cr.relname END as reftab,
+								          CASE nr.nspname WHEN '{$this->_schema}' THEN cr.relname ELSE nr.nspname||'.'||cr.relname END as reftab,
 								          array_agg(DISTINCT a1.attname) AS refcols
 								    FROM pg_constraint ct
 								         JOIN pg_class cl ON cl.oid=conrelid
@@ -540,7 +546,7 @@ class PgsqlSchemaParser extends BaseSchemaParser
 		-- WE DON'T HAVE ANY USE FOR THESE YET IN REVERSE ENGINEERING ...
 		$this->sequences = array();
 		$result = pg_query($this->conn->getResource(), "SELECT c.oid,
-								                        case when n.nspname='public' then c.relname else n.nspname||'.'||c.relname end as relname
+								                        case when n.nspname='{$this->_schema}' then c.relname else n.nspname||'.'||c.relname end as relname
 								                        FROM pg_class c join pg_namespace n on (c.relnamespace=n.oid)
 								                        WHERE c.relkind = 'S'
 								                          AND n.nspname NOT IN ('information_schema','pg_catalog')

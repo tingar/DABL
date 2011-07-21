@@ -5,6 +5,11 @@
  */
 class DBPostgres extends DABLPDO {
 
+	function setSchema($schema) {
+		parent::setSchema($schema);
+		$this->exec('SET search_path TO ' . $this->_schema);
+	}
+
 	/**
 	 * This method is used to ignore case.
 	 *

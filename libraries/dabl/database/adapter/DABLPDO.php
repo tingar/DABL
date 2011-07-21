@@ -8,6 +8,7 @@ abstract class DABLPDO extends PDO {
 	protected $queryLog = array();
 	protected $logQueries = false;
 	protected $dbName = null;
+	protected $_schema = null;
 
 	function setDBName($db_name) {
 		$this->dbName = $db_name;
@@ -15,6 +16,14 @@ abstract class DABLPDO extends PDO {
 
 	function getDBName() {
 		return $this->dbName;
+	}
+
+	function setSchema($schema) {
+		$this->_schema = $schema;
+	}
+
+	function getSchema() {
+		return $this->_schema;
 	}
 
 	function logQuery($query_string, $time) {
@@ -153,6 +162,9 @@ abstract class DABLPDO extends PDO {
 
 		try {
 			$conn = new $class($dsn, $user, $password, $options);
+			if (@$connection_params['schema']) {
+				$conn->setSchema($connection_params['schema']);
+			}
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
 		}
