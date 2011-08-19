@@ -6,7 +6,7 @@ require_once '../config.php';
 // controller/action/arg1/arg2?param1=value1
 // @see public/.htaccess
 $requested_route = @$_GET['_url'];
-$requested_route = (array_key_exists('REDIRECT__URL', $_SERVER['REDIRECT__URL']) ? $_SERVER['REDIRECT__URL'] : @$_SERVER['_URL']);
+$requested_route = (array_key_exists('REDIRECT__URL', $_SERVER) ? $_SERVER['REDIRECT__URL'] : @$_SERVER['_URL']);
 
 // handle the request with whatever Hooks have been set for that purpose
 // @see config/controllers.php
